@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="book.order.mapper.OrderMapper">
+	<select id="selectBookOrderHistory" parameterType="String" resultType="java.util.Map">
+		<![CDATA[
+			SELECT
+				a.order_no orderNo,
+				b.order_detail_no orderDetailNo,
+				a.user_username userUsername,
+				b.book_no bookNo,
+				b.book_title bookTitle,
+				b.order_price orderPrice,
+				a.order_date orderDate
+			FROM
+				order_common a
+			LEFT JOIN order_detail b
+			ON a.order_no=b.order_no
+			where
+				a.user_username=#{userUsername}
+			ORDER BY b.order_detail_no DESC;
+		]]>
+	</select>
+	
+	<select id="selectMaxOrderNo" resultType="String">
+		<![CDATA[
+			SELECT	max(order_no)
+			FROM	order_common
+		]]>
+	</select>
+	
+	<insert id="insertOrder" parameterType="book.order.dto.RequestOrderDto" useGeneratedKeys="true" keyProperty="orderNo">
+		<![CDATA[
+			INSERT INTO order_common
+			(
+				user_username, 
+				order_date
+			) 
+			VALUES 
+			(
+				#{userUsername},
+				NOW()
+			)
+		]]>
+	</insert>
+	
+	<insert id="insertOrderDetail" parameterType="java.util.Map" useGeneratedKeys="true" keyProperty="orderDetailNo">
+			INSERT INTO order_detail
+			(
+				order_no,
+				book_no,
+				book_title,
+				order_price
+			) 
+			VALUES 
+			<foreach collection="list" item="item" separator=" , ">
+	            (
+	            	#{item.orderNo},
+	            	#{item.bookNo},
+	            	#{item.bookTitle},
+	            	#{item.orderPrice}
+	            )
+	        </foreach>
+	</insert>
+</mapper>

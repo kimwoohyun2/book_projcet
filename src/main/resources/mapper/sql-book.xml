@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="book.book.mapper.BookMapper">
+	<!--  
+	<select id="selectBookList" parameterType="String" resultType="book.book.dto.BookDto">
+		<![CDATA[
+			SELECT
+				book_no,
+				book_title,
+				book_desc,
+				book_image,
+				book_author,
+				book_publisher,
+				book_pub_date,
+				book_page_no,
+				book_price,
+				regi_date,
+				last_date
+			FROM
+				book
+			WHERE 
+				match(book_title) AGAINST (#{searchWord} IN NATURAL LANGUAGE MODE)
+			ORDER BY book_no DESC
+		]]>
+	</select>
+	-->
+	
+	<select id="selectBookList" parameterType="String" resultType="book.book.dto.BookDto">
+			SELECT
+				book_no,
+				book_title,
+				book_desc,
+				book_image,
+				book_author,
+				book_publisher,
+				book_pub_date,
+				book_page_no,
+				book_price,
+				regi_date,
+				last_date
+			FROM
+				book
+			<if test='book_title != null and book_title != ""'>
+				WHERE 
+				book_title like CONCAT('%',#{book_title},'%')
+			</if>
+			ORDER BY book_no DESC
+	</select>
+	
+	<insert id="insertBook" parameterType="book.book.dto.BookDto" useGeneratedKeys="true" keyProperty="bookNo">
+		<![CDATA[
+			INSERT INTO book
+			(book_title, book_desc, book_image, book_author, book_publisher, book_pub_date, book_page_no, book_price, regi_date, last_date)
+			VALUES
+			(
+				#{bookTitle},
+				#{bookDesc},
+				null,
+				#{bookAuthor},
+				#{bookPublisher},
+				#{bookPubDate},
+				#{bookPageNo},
+				#{bookPrice},
+				NOW(),
+				NOW()
+			)
+		]]>
+	</insert>
+	
+	<update id="updateBook" parameterType="book.book.dto.BookDto">
+		<![CDATA[
+			UPDATE book SET 
+				book_title = #{bookTitle},
+				book_desc = #{bookDesc},
+				book_author = #{bookAuthor},
+				book_publisher = #{bookPublisher},
+				book_pub_date = #{bookPubDate},
+				book_page_no = #{bookPageNo},
+				book_price = #{bookPrice},
+				last_date = Now()
+			WHERE 
+				book_no = #{bookNo}
+		]]>
+	</update>
+	
+	<update id="deleteBook" parameterType="java.util.Map">
+		DELETE FROM book
+		<where> 
+			<foreach collection="list" item="item" open="" close="" separator="OR"> 
+				(book_no = #{item.bookNo}) 
+			</foreach>
+		</where> 
+	</update>
+</mapper>
